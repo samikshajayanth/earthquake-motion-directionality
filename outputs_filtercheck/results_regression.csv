@@ -1,0 +1,5 @@
+model,r2,rmse_log_ratio,mae_log_ratio
+Baseline (mean),-0.013,0.093,0.083
+Ridge regression,0.13,0.086,0.073
+Random forest,0.076,0.089,0.075
+Gradient boosting,-0.02,0.093,0.078

@@ -1,0 +1,20 @@
+# Python environment and cache
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# macOS
+.DS_Store
+.localized
+
+# Large generated cache / raw data
+rotd100_full.csv
+
+# Local earthquake time-series data
+data/
+
+# Older experimental outputs
+outputs_300/
+outputs_final/
+outputs_trial/

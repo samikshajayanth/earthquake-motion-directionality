@@ -1,0 +1,38 @@
+{
+  "rotd50_source": "computed from /Users/samikshajayanth/Downloads/UnscaledAccRecord9417",
+  "rotd100_source": "computed from /Users/samikshajayanth/Downloads/UnscaledAccRecord9417",
+  "columns_matched": {
+    "rsn": "Record Sequence Number",
+    "event_id": "Earthquake Name",
+    "magnitude": "Magnitude",
+    "rrup": "Rrup (km)",
+    "rjb": "Rjb (km)",
+    "vs30": "Vs30 (m/sec)",
+    "mechanism": "Mechanism",
+    "hp_freq": "Lowest Useable Frequency (Hz)"
+  },
+  "dropped_for_unusable_period": 2,
+  "period_requested": 1.0,
+  "period_used": 1.0,
+  "records_matched_by_rsn": 100,
+  "records_after_cleaning": 98,
+  "records_dropped": 2,
+  "n_events": 34,
+  "records_with_time_series": 100,
+  "records_in_search_results": 100,
+  "features": [
+    "magnitude",
+    "log_rrup",
+    "log_rjb",
+    "log_vs30",
+    "mech_0",
+    "mech_2",
+    "mech_3"
+  ],
+  "ratio_median": 1.2348712482888184,
+  "ratio_mean": 1.2399649338858056,
+  "strong_directionality_threshold": 1.370399040573652,
+  "strong_fraction": 0.20408163265306123,
+  "cv_grouped_by": "earthquake",
+  "folds": 5
+}
