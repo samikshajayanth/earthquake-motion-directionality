@@ -32,3 +32,18 @@ synthetic_hybrid/
 
 # Temporary Python and editor files
 *.pyc
+
+# Intermediate outputs and local sample files
+outputs/
+outputs_10711/
+outputs_196/
+outputs_196_analysis/
+outputs_event_grouped/
+outputs_foldcheck/
+outputs_improved/
+outputs_merged/
+outputs_new/
+outputs_tuned/
+outputs_validated/
+rotd100_sample.csv
+rotd100_sample.json
