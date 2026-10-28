@@ -1,0 +1,38 @@
+{
+  "classification_roc_auc": {
+    "mean": 0.6542806811509101,
+    "std": 0.0044312330389661815
+  },
+  "classification_accuracy": {
+    "mean": 0.6428571428571429,
+    "std": 0.005102040816326536
+  },
+  "classification_precision": {
+    "mean": 0.46456173723744537,
+    "std": 0.008055177509945022
+  },
+  "classification_recall": {
+    "mean": 0.5076923076923077,
+    "std": 0.03263569759322527
+  },
+  "classification_f1": {
+    "mean": 0.4849205741768333,
+    "std": 0.01861180127037461
+  },
+  "regression_r2": {
+    "mean": 0.07895519021944378,
+    "std": 0.006316015912506482
+  },
+  "regression_mae_log_ratio": {
+    "mean": 0.07264206687202528,
+    "std": 0.00023712122569742304
+  },
+  "regression_rmse_log_ratio": {
+    "mean": 0.08472719099627306,
+    "std": 0.00029057540562937395
+  },
+  "records": 196,
+  "events": 40,
+  "repeats": 5,
+  "validation": "Five repetitions of five-fold stratified event-grouped CV; fixed Extra Trees settings"
+}

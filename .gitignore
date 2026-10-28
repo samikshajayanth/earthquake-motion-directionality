@@ -18,3 +18,17 @@ data/
 outputs_300/
 outputs_final/
 outputs_trial/
+
+# Local backups
+*.backup
+*.bak
+
+# Intermediate experimental data
+cache_inputs/
+combined_input/
+combined_timeseries/
+synthetic_experiment/
+synthetic_hybrid/
+
+# Temporary Python and editor files
+*.pyc

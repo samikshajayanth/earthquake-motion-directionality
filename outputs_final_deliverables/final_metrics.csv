@@ -1,0 +1,9 @@
+Task,Model,Metric,Value,Interpretation
+Classification,Extra Trees,ROC-AUC,0.6479154433352906,Higher is better
+Classification,Extra Trees,Accuracy,0.6479591836734694,Higher is better
+Classification,Extra Trees,Precision,0.47368421052631576,Higher is better
+Classification,Extra Trees,Recall,0.5538461538461539,Higher is better
+Classification,Extra Trees,F1-score,0.5106382978723404,Higher is better
+Regression,Extra Trees,R-squared,0.0633806414848278,Higher is better
+Regression,Extra Trees,MAE (log ratio),0.07328778332288324,Lower is better
+Regression,Extra Trees,RMSE (log ratio),0.08544094370821452,Lower is better

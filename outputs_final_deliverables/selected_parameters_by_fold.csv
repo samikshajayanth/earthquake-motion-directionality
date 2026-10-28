@@ -1,0 +1,11 @@
+task,fold,best_inner_score,parameters
+classification,1,0.6560650887573964,"{""extratreesclassifier__n_estimators"": 200, ""extratreesclassifier__min_samples_leaf"": 10, ""extratreesclassifier__max_features"": 1.0, ""extratreesclassifier__max_depth"": 3}"
+classification,2,0.6810760464606618,"{""extratreesclassifier__n_estimators"": 600, ""extratreesclassifier__min_samples_leaf"": 10, ""extratreesclassifier__max_features"": 1.0, ""extratreesclassifier__max_depth"": 12}"
+classification,3,0.6013039666885822,"{""extratreesclassifier__n_estimators"": 400, ""extratreesclassifier__min_samples_leaf"": 10, ""extratreesclassifier__max_features"": 0.5, ""extratreesclassifier__max_depth"": 5}"
+classification,4,0.6281503396888012,"{""extratreesclassifier__n_estimators"": 400, ""extratreesclassifier__min_samples_leaf"": 2, ""extratreesclassifier__max_features"": 1.0, ""extratreesclassifier__max_depth"": 3}"
+classification,5,0.7044433486741178,"{""extratreesclassifier__n_estimators"": 200, ""extratreesclassifier__min_samples_leaf"": 10, ""extratreesclassifier__max_features"": 0.7, ""extratreesclassifier__max_depth"": 3}"
+regression,1,-0.0749344974285365,"{""extratreesregressor__n_estimators"": 600, ""extratreesregressor__min_samples_leaf"": 4, ""extratreesregressor__max_features"": 0.7, ""extratreesregressor__max_depth"": 12}"
+regression,2,-0.0703527987217634,"{""extratreesregressor__n_estimators"": 600, ""extratreesregressor__min_samples_leaf"": 4, ""extratreesregressor__max_features"": 1.0, ""extratreesregressor__max_depth"": 3}"
+regression,3,-0.0733224505629856,"{""extratreesregressor__n_estimators"": 400, ""extratreesregressor__min_samples_leaf"": 10, ""extratreesregressor__max_features"": 1.0, ""extratreesregressor__max_depth"": null}"
+regression,4,-0.0711387331624193,"{""extratreesregressor__n_estimators"": 600, ""extratreesregressor__min_samples_leaf"": 2, ""extratreesregressor__max_features"": 0.7, ""extratreesregressor__max_depth"": 12}"
+regression,5,-0.070057087020811,"{""extratreesregressor__n_estimators"": 200, ""extratreesregressor__min_samples_leaf"": 6, ""extratreesregressor__max_features"": 1.0, ""extratreesregressor__max_depth"": 12}"

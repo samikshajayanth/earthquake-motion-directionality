@@ -36,7 +36,7 @@ ANGLE_STEP_DEG = 2.0
 _NPTS_RE = re.compile(r"NPTS\s*=\s*(\d+)\s*,\s*DT\s*=\s*([0-9.eE+\-]+)", re.IGNORECASE)
 _FLOAT_RE = re.compile(r"[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?")
 _RSN_RE = re.compile(r"^RSN(\d+)_", re.IGNORECASE)
-_VERTICAL_TOKENS = {"UP", "DWN", "DOWN", "V", "VER", "VERT", "VERTICAL", "Z"}
+_VERTICAL_TOKENS = {"UP", "DWN", "DOWN", "DN", "V", "VER", "VERT", "VERTICAL", "Z"}
 
 
 # ----------------------------------------------------------------- reading

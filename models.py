@@ -10,7 +10,8 @@ from sklearn.ensemble import (HistGradientBoostingClassifier, HistGradientBoosti
                               RandomForestClassifier, RandomForestRegressor)
 from sklearn.impute import SimpleImputer
 from sklearn.inspection import permutation_importance
-from sklearn.linear_model import LogisticRegression, Ridge
+from sklearn.linear_model import ElasticNet, LogisticRegression, Ridge
+from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.metrics import (accuracy_score, f1_score, mean_absolute_error, precision_score,
                              r2_score, recall_score, roc_auc_score)
 from sklearn.model_selection import GroupKFold, GroupShuffleSplit
@@ -38,14 +39,50 @@ def classifiers():
 
 def regressors():
     return {
-        "Baseline (mean)": make_pipeline(SimpleImputer(strategy="median"), DummyRegressor()),
-        "Ridge regression": make_pipeline(SimpleImputer(strategy="median"), StandardScaler(),
-                                          Ridge(alpha=1.0)),
-        "Random forest": make_pipeline(SimpleImputer(strategy="median"),
-                                       RandomForestRegressor(n_estimators=300, min_samples_leaf=5,
-                                                             n_jobs=-1, random_state=SEED)),
-        "Gradient boosting": HistGradientBoostingRegressor(max_depth=4, learning_rate=0.05,
-                                                           max_iter=300, random_state=SEED),
+        "Baseline (mean)": make_pipeline(
+            SimpleImputer(strategy="median"),
+            DummyRegressor()
+        ),
+
+        "Ridge regression": make_pipeline(
+            SimpleImputer(strategy="median"),
+            StandardScaler(),
+            Ridge(alpha=1.0)
+        ),
+
+        "Elastic Net": make_pipeline(
+            SimpleImputer(strategy="median"),
+            StandardScaler(),
+            ElasticNet(alpha=0.01, l1_ratio=0.5, max_iter=10000)
+        ),
+
+        "Random forest": make_pipeline(
+            SimpleImputer(strategy="median"),
+            RandomForestRegressor(
+                n_estimators=300,
+                min_samples_leaf=5,
+                n_jobs=-1,
+                random_state=SEED
+            )
+        ),
+
+        "Extra Trees": make_pipeline(
+            SimpleImputer(strategy="median"),
+            ExtraTreesRegressor(
+                n_estimators=300,
+                min_samples_leaf=5,
+                max_features=1.0,
+                n_jobs=-1,
+                random_state=SEED
+            )
+        ),
+
+        "Gradient boosting": HistGradientBoostingRegressor(
+            max_depth=4,
+            learning_rate=0.05,
+            max_iter=300,
+            random_state=SEED
+        ),
     }
 
 
@@ -54,37 +91,97 @@ def _folds(n_splits, groups):
     return GroupKFold(n_splits=n_splits)
 
 
+
+
 def cross_val_classification(X, y, groups, n_splits=5):
-    """Out-of-fold probabilities and metrics for every classifier."""
-    results, oof = [], {}
+    """Out-of-fold probabilities, overall metrics, and fold-level metrics."""
+    results, oof, fold_results = [], {}, []
+    splitter = _folds(n_splits, groups)
+
     for name, model in classifiers().items():
         prob = np.zeros(len(y))
-        for tr, te in _folds(n_splits, groups).split(X, y, groups):
+
+        for fold, (tr, te) in enumerate(
+            splitter.split(X, y, groups), start=1
+        ):
             m = _clone(model)
             m.fit(X.iloc[tr], y.iloc[tr])
-            prob[te] = m.predict_proba(X.iloc[te])[:, 1]
+            fold_prob = m.predict_proba(X.iloc[te])[:, 1]
+            prob[te] = fold_prob
+
+            y_test = y.iloc[te]
+            pred_test = (fold_prob >= 0.5).astype(int)
+
+            fold_results.append({
+                "model": name,
+                "fold": fold,
+                "test_records": len(te),
+                "test_events": len(set(np.asarray(groups)[te])),
+                "roc_auc": (
+                    roc_auc_score(y_test, fold_prob)
+                    if y_test.nunique() > 1 else np.nan
+                ),
+                "accuracy": accuracy_score(y_test, pred_test),
+                "precision": precision_score(
+                    y_test, pred_test, zero_division=0
+                ),
+                "recall": recall_score(
+                    y_test, pred_test, zero_division=0
+                ),
+                "f1": f1_score(
+                    y_test, pred_test, zero_division=0
+                ),
+            })
+
         pred = (prob >= 0.5).astype(int)
         results.append({
             "model": name,
-            "roc_auc": roc_auc_score(y, prob) if y.nunique() > 1 else np.nan,
+            "roc_auc": (
+                roc_auc_score(y, prob) if y.nunique() > 1 else np.nan
+            ),
             "accuracy": accuracy_score(y, pred),
             "precision": precision_score(y, pred, zero_division=0),
             "recall": recall_score(y, pred, zero_division=0),
             "f1": f1_score(y, pred, zero_division=0),
         })
         oof[name] = prob
-    return results, oof
+
+    return results, oof, fold_results
+
 
 
 def cross_val_regression(X, y, groups, n_splits=5):
-    """Out-of-fold predictions and metrics for every regressor."""
-    results, oof = [], {}
+    """Out-of-fold predictions, pooled metrics, and fold-level metrics."""
+    results, oof, fold_results = [], {}, []
+    splitter = _folds(n_splits, groups)
+
     for name, model in regressors().items():
         pred = np.zeros(len(y))
-        for tr, te in _folds(n_splits, groups).split(X, y, groups):
+
+        for fold, (tr, te) in enumerate(
+            splitter.split(X, y, groups), start=1
+        ):
             m = _clone(model)
             m.fit(X.iloc[tr], y.iloc[tr])
-            pred[te] = m.predict(X.iloc[te])
+            fold_pred = m.predict(X.iloc[te])
+            pred[te] = fold_pred
+
+            fold_groups = groups.iloc[te] if hasattr(groups, "iloc") else groups[te]
+            fold_results.append({
+                "model": name,
+                "fold": fold,
+                "n_train": len(tr),
+                "n_test": len(te),
+                "n_test_events": len(set(fold_groups)),
+                "r2": r2_score(y.iloc[te], fold_pred),
+                "rmse_log_ratio": float(
+                    np.sqrt(np.mean((y.iloc[te] - fold_pred) ** 2))
+                ),
+                "mae_log_ratio": mean_absolute_error(
+                    y.iloc[te], fold_pred
+                ),
+            })
+
         results.append({
             "model": name,
             "r2": r2_score(y, pred),
@@ -92,7 +189,8 @@ def cross_val_regression(X, y, groups, n_splits=5):
             "mae_log_ratio": mean_absolute_error(y, pred),
         })
         oof[name] = pred
-    return results, oof
+
+    return results, oof, fold_results
 
 
 

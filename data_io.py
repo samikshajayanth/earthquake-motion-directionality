@@ -75,14 +75,14 @@ def match_columns(columns, overrides=None):
             if alias in by_norm:
                 found[canon] = by_norm[alias]
                 break
-    
+
     # High-pass / lowest usable frequency column (PEER uses both spellings).
     if "hp_freq" not in found and "hp_freq" not in overrides:
         for norm, col in by_norm.items():
             if "lowest usable freq" in norm or "lowest useable freq" in norm:
                 found["hp_freq"] = col
                 break
-    return found 
+    return found
 
 
 def spectral_columns(columns):
@@ -309,8 +309,17 @@ def build_dataset_from_timeseries(folder, period=1.0, periods=None, workers=1,
         ),
         None,
     )
+
+    # Accept either a full PEER report or a standalone CSV containing the
+    # 22-column metadata table.
     if header_row is None:
-        raise ValueError(f"Could not find the metadata table header in {search_file}")
+        first_line = search_lines[0] if search_lines else ""
+        if first_line.strip().lower().startswith(
+            "result id,spectral ordinate,record sequence number"
+        ):
+            header_row = 0
+        else:
+            raise ValueError(f"Could not find the metadata table header in {search_file}")
 
     header = next(csv.reader([search_lines[header_row]], skipinitialspace=True))
     expected_fields = len(header)

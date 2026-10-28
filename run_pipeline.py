@@ -91,12 +91,22 @@ def main():
           f"({y_cls.mean():.1%} of records); CV grouped by {group_kind}")
 
     print("\nDetection (classification) ...")
-    cls_results, cls_oof = models.cross_val_classification(X, y_cls, groups, args.folds)
+    cls_results, cls_oof, cls_fold_results = models.cross_val_classification(
+    X, y_cls, groups, args.folds
+    )
+    pd.DataFrame(cls_fold_results).to_csv(
+        out / "classification_fold_metrics.csv", index=False
+    )
     cls_df = pd.DataFrame(cls_results).round(3)
     print(cls_df.to_string(index=False))
 
     print("\nPrediction (regression on log ratio) ...")
-    reg_results, reg_oof = models.cross_val_regression(X, y_reg, groups, args.folds)
+    reg_results, reg_oof, reg_fold_results = models.cross_val_regression(
+        X, y_reg, groups, args.folds
+    )
+    pd.DataFrame(reg_fold_results).to_csv(
+        out / "regression_fold_metrics.csv", index=False
+    )
     reg_df = pd.DataFrame(reg_results).round(3)
     print(reg_df.to_string(index=False))
 
@@ -105,6 +115,9 @@ def main():
 
     cls_df.to_csv(out / "results_classification.csv", index=False)
     reg_df.to_csv(out / "results_regression.csv", index=False)
+    pd.DataFrame(reg_fold_results).round(3).to_csv(
+        out / "regression_fold_metrics.csv", index=False
+    )
     pd.DataFrame(importance).to_csv(out / "feature_importance.csv", index=False)
     period_stats.to_csv(out / "ratio_by_period.csv", index=False)
     (out / "summary.json").write_text(json.dumps(info, indent=2, default=str))
