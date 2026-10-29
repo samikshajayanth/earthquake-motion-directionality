@@ -144,3 +144,105 @@ numbers.**
 - Angles are sampled every 2 degrees, so RotD100 is accurate to well under 1%.
 - The strong-directionality threshold is a modelling choice; report results for
   more than one.
+
+## Additional analysis workflow (cached RotD dataset)
+
+The following scripts belong to the later analysis workflow used to compare feature sets and evaluate directionality prediction. Run commands from the repository root with the project environment activated.
+
+### Prerequisites
+
+These analysis scripts use a previously generated RotD cache. The main cache used in this workflow is:
+
+```text
+outputs_196/rotd_cache.csv
+```
+
+The raw time-series data and some intermediate caches are local data products and are not committed to GitHub. Recreate them using the data preparation workflow above, or restore the required cache from your local project workspace. The event-grouped validation script also expects the NGA-West2 flatfile at the path configured near the top of `event_grouped_validation.py`.
+
+### Run the analysis scripts
+
+Evaluate the cached dataset and create baseline metrics and labels:
+
+```bash
+python evaluate_cache.py
+```
+
+Outputs are written to `outputs_196_analysis/`.
+
+Compare model and feature configurations:
+
+```bash
+python improve_models.py
+```
+
+Outputs are written to `outputs_improved/`.
+
+Run a single event-grouped validation experiment:
+
+```bash
+python event_grouped_validation.py
+```
+
+Outputs are written to `outputs_event_grouped/`. This script requires the RotD cache and the flatfile path configured in the script.
+
+Run the repeated event-grouped evaluation used for the final reported repeated-CV metrics:
+
+```bash
+python repeated_event_validation.py
+```
+
+Outputs are written to `outputs_repeated_event_cv/`:
+
+- `repeat_summary.csv`: metrics for each of the five repetitions.
+- `fold_details.csv`: per-fold evaluation details.
+- `summary.json`: aggregate mean and standard deviation across repetitions.
+
+The script uses five repetitions of five-fold `StratifiedGroupKFold`, grouping records by earthquake ID (`EQID`). Records from the same event therefore remain in one fold. This is internal cross-validation, not independent external validation.
+
+### Regenerate the nested-CV deliverables
+
+The following script creates plots, fold-level tables, selected-parameter tables, and a limitations report from the earlier nested-CV outputs:
+
+```bash
+python make_final_deliverables.py
+```
+
+It expects the following files under `outputs_tuned/`:
+
+- `nested_cv_summary.json`
+- `classification_outer_folds.csv`
+- `regression_outer_folds.csv`
+- `selected_parameters_by_fold.csv`
+
+Outputs are written to `outputs_final_deliverables/`. These deliverables are based on the earlier nested record-level CV experiment; they are distinct from the repeated event-grouped results in `outputs_repeated_event_cv/`. Do not mix metrics from these different evaluation designs.
+
+### Inspect results
+
+```bash
+cat outputs_repeated_event_cv/summary.json
+cat outputs_repeated_event_cv/repeat_summary.csv
+cat outputs_repeated_event_cv/fold_details.csv
+cat outputs_final_deliverables/final_results_and_limitations.md
+```
+
+### Final repeated event-grouped results
+
+The repeated event-grouped evaluation used 196 records from 40 earthquake IDs, with fixed Extra Trees model settings and five repetitions of five-fold grouped validation. The reported averages (mean ± sample standard deviation across repetitions) were:
+
+| Task | Metric | Mean ± standard deviation |
+|------|--------|---------------------------|
+| Classification | ROC-AUC | 0.6543 ± 0.0044 |
+| Classification | Accuracy | 0.6429 ± 0.0051 |
+| Classification | Precision | 0.4646 ± 0.0081 |
+| Classification | Recall | 0.5077 ± 0.0326 |
+| Classification | F1-score | 0.4849 ± 0.0186 |
+| Regression on log(ratio) | R² | 0.0790 ± 0.0063 |
+| Regression on log(ratio) | MAE | 0.07264 ± 0.00024 |
+| Regression on log(ratio) | RMSE | 0.08473 ± 0.00029 |
+
+Regression errors are in log-ratio units, not percentages. The classification results indicate modest discrimination above chance, while the regression R² indicates limited explained variation. These are preliminary internal-validation results and should not be interpreted as evidence of production readiness or external generalization.
+
+### Other analysis scripts
+
+The repository also contains scripts for exploratory comparisons and diagnostics, including `compare_feature_sets.py`, `compare_nonlinear.py`, `compare_synthetic_training.py`, `compare_synthetic_repeated.py`, `nested_polynomial_validation.py`, `nested_regression_validation.py`, `tune_improved.py`, `tune_regression.py`, `residual_analysis.py`, and `plot_final_results.py`. Their outputs and prerequisites vary; inspect each script's constants and input paths before running it. Synthetic experiments are exploratory and must not be presented as real earthquake-record evaluation.
+
