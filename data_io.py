@@ -300,26 +300,39 @@ def build_dataset_from_timeseries(folder, period=1.0, periods=None, workers=1,
     # PEER reports contain a two-column search-criteria preamble, followed by
     # the actual 22-column metadata table and sometimes additional report
     # sections. Find the exact metadata header, then keep only its data rows.
-    header_row = next(
-        (
-            i for i, line in enumerate(search_lines)
-            if line.strip().lower().startswith(
-                "result id, spectral ordinate, record sequence number"
-            )
-        ),
-        None,
-    )
+    header_row = None
 
-    # Accept either a full PEER report or a standalone CSV containing the
-    # 22-column metadata table.
-    if header_row is None:
-        first_line = search_lines[0] if search_lines else ""
-        if first_line.strip().lower().startswith(
-            "result id,spectral ordinate,record sequence number"
+    for i, line in enumerate(search_lines):
+        try:
+            columns = [
+                col.strip().lower()
+                for col in next(csv.reader([line], skipinitialspace=True))
+            ]
+        except csv.Error:
+            continue
+
+        # Recognize either a full PEER report or the synthetic standalone CSV.
+        if (
+            len(columns) >= 3
+            and columns[:3] == [
+                "result id",
+                "spectral ordinate",
+                "record sequence number",
+            ]
         ):
-            header_row = 0
-        else:
-            raise ValueError(f"Could not find the metadata table header in {search_file}")
+            header_row = i
+            break
+
+        if (
+            len(columns) >= 2
+            and columns[0] == "record sequence number"
+            and columns[1] == "earthquake name"
+        ):
+            header_row = i
+            break
+
+    if header_row is None:
+        raise ValueError(f"Could not find the metadata table header in {search_file}")
 
     header = next(csv.reader([search_lines[header_row]], skipinitialspace=True))
     expected_fields = len(header)
